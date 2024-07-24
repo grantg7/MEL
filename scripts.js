@@ -178,6 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
     entryDiv.classList.add("expanded");
     entryDiv.querySelector(".content").style.display = "block";
     entryDiv.querySelector(".select-meal").disabled = false;
+    entryDiv.querySelector(".close-btn").style.display = "block";
     entryDiv.onclick = null;
   };
 
@@ -185,6 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
     entryDiv.classList.remove("expanded");
     entryDiv.querySelector(".content").style.display = "none";
     entryDiv.querySelector(".select-meal").disabled = true;
+    entryDiv.querySelector(".close-btn").style.display = "none";
     entryDiv.onclick = () => expandEntry(entryDiv);
   };
 
