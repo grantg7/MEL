@@ -2,7 +2,9 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f0f0f0;
+  background-color: #82e2f1;
+  text-align: center;
+  width: 100%;
 }
 
 .container {
@@ -19,13 +21,15 @@ h1 {
 }
 
 label {
+  text-align: center;
   display: block;
   margin-top: 10px;
   font-size: 16px;
 }
 
 input[type="date"] {
-  width: 100%;
+  width: 25%;
+  text-align: center;
   padding: 5px;
   margin: 10px 0;
   font-size: 16px;
@@ -33,6 +37,7 @@ input[type="date"] {
 
 button {
   display: inline-block;
+  text-align: center;
   margin: 10px 5px;
   padding: 5px 10px;
   font-size: 14px;
@@ -61,6 +66,7 @@ button {
 
 .entry.expanded .content {
   display: block;
+  text-align: left;
 }
 
 .entry .summary {
@@ -76,6 +82,14 @@ button {
 
 .select-meal,
 input[type="text"] {
+  width: 100%;
+  padding: 5px;
+  margin: 5px 0;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.journal-title {
   width: 100%;
   padding: 5px;
   margin: 5px 0;
@@ -107,12 +121,11 @@ input[type="text"] {
 }
 
 .comment {
-  display: none;
   margin-top: 10px;
 }
 
 .comment textarea {
-  width: 100%;
+  width: 90%;
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #ddd;
@@ -124,7 +137,7 @@ input[type="text"] {
   border: none;
   cursor: pointer;
   position: absolute;
-  top: 10px;
+  top: -10px;
   right: 10px;
   display: none;
 }
@@ -140,10 +153,24 @@ input[type="text"] {
   display: block;
 }
 
-.save-btn {
+.entry.expanded .remove-btn {
+  top: 40px;
+}
+
+.save-btn,
+.delete-btn {
   display: inline-block;
   margin: 10px 5px;
   padding: 5px 10px;
   font-size: 14px;
   cursor: pointer;
+}
+
+.timer-controls {
+  display: none;
+}
+
+.journal-input {
+  width: 550px;
+  height: 160px;
 }

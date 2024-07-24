@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "Afternoon Snack",
     "Dinner",
     "Evening Snack",
+    "Journal",
   ];
 
   const saveLogs = () => {
@@ -40,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "Afternoon Snack",
       "Dinner",
       "Evening Snack",
+      "Journal",
     ].forEach((meal) => {
       const option = document.createElement("option");
       option.value = meal;
@@ -47,23 +49,32 @@ document.addEventListener("DOMContentLoaded", () => {
       if (meal === entry.meal) option.selected = true;
       mealSelect.appendChild(option);
     });
-    mealSelect.disabled = true;
+    mealSelect.disabled = false;
 
     const foodSpan = document.createElement("span");
-    foodSpan.textContent = entry.food || "What did you eat?";
+    foodSpan.textContent =
+      entry.meal === "Journal"
+        ? "My Body Journal"
+        : entry.food || "What did you eat?";
 
     mealInfoDiv.appendChild(mealSelect);
     mealInfoDiv.appendChild(foodSpan);
 
     const ratingDiv = document.createElement("div");
     ratingDiv.className = "rating";
-    for (let i = 1; i <= 5; i++) {
-      const star = document.createElement("span");
-      star.textContent = "★";
-      if (i <= entry.rating) {
-        star.classList.add("rated");
+    if (entry.meal !== "Journal") {
+      for (let i = 1; i <= 5; i++) {
+        const star = document.createElement("span");
+        star.textContent = "★";
+        if (i <= entry.rating) {
+          star.classList.add("rated");
+        }
+        star.onclick = (event) => {
+          event.stopPropagation();
+          rateEntry(index, i);
+        };
+        ratingDiv.appendChild(star);
       }
-      ratingDiv.appendChild(star);
     }
 
     summaryDiv.appendChild(mealInfoDiv);
@@ -72,61 +83,126 @@ document.addEventListener("DOMContentLoaded", () => {
     const contentDiv = document.createElement("div");
     contentDiv.className = "content";
 
-    const foodInput = document.createElement("input");
-    foodInput.type = "text";
-    foodInput.value = entry.food;
-    foodInput.placeholder = "What did you eat?";
+    if (entry.meal === "Journal") {
+      const titleInput = document.createElement("input");
+      titleInput.type = "text";
+      titleInput.value = entry.title || "";
+      titleInput.placeholder = "Title";
+      titleInput.className = "journal-title";
+      titleInput.oninput = () => {
+        entry.title = titleInput.value;
+      };
 
-    const timerCheckbox = document.createElement("input");
-    timerCheckbox.type = "checkbox";
-    timerCheckbox.id = `setTimer-${index}`;
-    timerCheckbox.className = "set-timer";
+      const journalTextarea = document.createElement("textarea");
+      journalTextarea.maxLength = 1000;
+      journalTextarea.placeholder = "Write your journal entry...";
+      journalTextarea.value = entry.text || "";
+      journalTextarea.className = "journal-input";
+      journalTextarea.oninput = () => {
+        entry.text = journalTextarea.value;
+      };
 
-    const timerLabel = document.createElement("label");
-    timerLabel.htmlFor = `setTimer-${index}`;
-    timerLabel.textContent = "Set Timer?";
+      const saveBtn = document.createElement("button");
+      saveBtn.className = "save-btn";
+      saveBtn.textContent = "Save and Exit";
+      saveBtn.onclick = (event) => {
+        event.stopPropagation();
+        saveEntry(entryDiv, index);
+      };
 
-    const timerControlsDiv = document.createElement("div");
-    timerControlsDiv.className = "timer-controls";
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "delete-btn";
+      deleteBtn.textContent = "Remove";
+      deleteBtn.onclick = (event) => {
+        event.stopPropagation();
+        removeEntry(index);
+      };
 
-    const timerRange = document.createElement("input");
-    timerRange.type = "range";
-    timerRange.min = "5";
-    timerRange.max = "60";
-    timerRange.step = "5";
-    timerRange.value = "30";
-    timerRange.className = "timer-range";
+      contentDiv.appendChild(titleInput);
+      contentDiv.appendChild(journalTextarea);
+      contentDiv.appendChild(saveBtn);
+      contentDiv.appendChild(deleteBtn);
+    } else {
+      const foodInput = document.createElement("input");
+      foodInput.type = "text";
+      foodInput.value = entry.food;
+      foodInput.placeholder = "What did you eat?";
 
-    const timerRangeLabel = document.createElement("label");
-    timerRangeLabel.textContent = `Timer: ${timerRange.value} mins`;
+      const timerCheckbox = document.createElement("input");
+      timerCheckbox.type = "checkbox";
+      timerCheckbox.id = `setTimer-${index}`;
+      timerCheckbox.className = "set-timer";
 
-    timerRange.oninput = () => {
+      const timerLabel = document.createElement("label");
+      timerLabel.htmlFor = `setTimer-${index}`;
+      timerLabel.textContent = "Set Timer?";
+
+      const timerControlsDiv = document.createElement("div");
+      timerControlsDiv.className = "timer-controls";
+
+      const timerRange = document.createElement("input");
+      timerRange.type = "range";
+      timerRange.min = "5";
+      timerRange.max = "60";
+      timerRange.step = "5";
+      timerRange.value = "30";
+      timerRange.className = "timer-range";
+
+      const timerRangeLabel = document.createElement("label");
       timerRangeLabel.textContent = `Timer: ${timerRange.value} mins`;
-    };
 
-    const timerBtn = document.createElement("button");
-    timerBtn.textContent = "Start Timer";
-    timerBtn.onclick = () => startTimer(entryDiv, index, timerRange.value);
+      timerRange.oninput = () => {
+        timerRangeLabel.textContent = `Timer: ${timerRange.value} mins`;
+      };
 
-    timerControlsDiv.appendChild(timerRangeLabel);
-    timerControlsDiv.appendChild(timerRange);
-    timerControlsDiv.appendChild(timerBtn);
+      const timerBtn = document.createElement("button");
+      timerBtn.textContent = "Start Timer";
+      timerBtn.onclick = () => startTimer(entryDiv, index, timerRange.value);
 
-    timerCheckbox.onchange = () => {
-      if (timerCheckbox.checked) {
-        timerControlsDiv.style.display = "block";
-      } else {
-        timerControlsDiv.style.display = "none";
-      }
-    };
+      timerControlsDiv.appendChild(timerRangeLabel);
+      timerControlsDiv.appendChild(timerRange);
+      timerControlsDiv.appendChild(timerBtn);
 
-    const commentDiv = document.createElement("div");
-    commentDiv.className = "comment";
-    const commentTextarea = document.createElement("textarea");
-    commentTextarea.maxLength = 500;
-    commentTextarea.placeholder = "How did it make you feel?";
-    commentTextarea.value = entry.comment;
-    commentDiv.appendChild(commentTextarea);
+      timerCheckbox.onchange = () => {
+        timerControlsDiv.style.display = timerCheckbox.checked
+          ? "block"
+          : "none";
+      };
+
+      const commentDiv = document.createElement("div");
+      commentDiv.className = "comment";
+      const commentTextarea = document.createElement("textarea");
+      commentTextarea.maxLength = 500;
+      commentTextarea.placeholder = "How did it make you feel?";
+      commentTextarea.value = entry.comment;
+      commentTextarea.oninput = () =>
+        updateComment(index, commentTextarea.value);
+      commentDiv.appendChild(commentTextarea);
+
+      const saveBtn = document.createElement("button");
+      saveBtn.className = "save-btn";
+      saveBtn.textContent = "Save and Exit";
+      saveBtn.onclick = (event) => {
+        event.stopPropagation();
+        saveEntry(entryDiv, index);
+      };
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "delete-btn";
+      deleteBtn.textContent = "Remove";
+      deleteBtn.onclick = (event) => {
+        event.stopPropagation();
+        removeEntry(index);
+      };
+
+      contentDiv.appendChild(foodInput);
+      contentDiv.appendChild(timerCheckbox);
+      contentDiv.appendChild(timerLabel);
+      contentDiv.appendChild(timerControlsDiv);
+      contentDiv.appendChild(commentDiv);
+      contentDiv.appendChild(saveBtn);
+      contentDiv.appendChild(deleteBtn);
+    }
 
     const closeBtn = document.createElement("button");
     closeBtn.className = "close-btn";
@@ -140,21 +216,6 @@ document.addEventListener("DOMContentLoaded", () => {
       collapseEntry(entryDiv);
     };
 
-    const saveBtn = document.createElement("button");
-    saveBtn.className = "save-btn";
-    saveBtn.textContent = "Save and Exit";
-    saveBtn.onclick = (event) => {
-      event.stopPropagation();
-      saveEntry(entryDiv, index);
-    };
-
-    contentDiv.appendChild(foodInput);
-    contentDiv.appendChild(timerCheckbox);
-    contentDiv.appendChild(timerLabel);
-    contentDiv.appendChild(timerControlsDiv);
-    contentDiv.appendChild(commentDiv);
-    contentDiv.appendChild(saveBtn);
-
     entryDiv.appendChild(summaryDiv);
     entryDiv.appendChild(contentDiv);
     entryDiv.appendChild(closeBtn);
@@ -162,8 +223,6 @@ document.addEventListener("DOMContentLoaded", () => {
     entriesContainer.appendChild(entryDiv);
 
     mealSelect.onchange = () => updateMeal(index, mealSelect.value);
-    foodInput.oninput = () => updateFood(index, foodInput.value);
-    commentTextarea.oninput = () => updateComment(index, commentTextarea.value);
   };
 
   const renderEntries = () => {
@@ -248,11 +307,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const timerRange = entryDiv.querySelector(".timer-range");
     const commentTextarea = entryDiv.querySelector(".comment textarea");
 
-    currentEntries[index].food = foodInput.value;
-    currentEntries[index].timer = timerCheckbox.checked
-      ? timerRange.value
+    currentEntries[index].food = foodInput ? foodInput.value : "";
+    currentEntries[index].timer = timerCheckbox
+      ? timerCheckbox.checked
+        ? timerRange.value
+        : null
       : null;
-    currentEntries[index].comment = commentTextarea.value;
+    currentEntries[index].comment = commentTextarea
+      ? commentTextarea.value
+      : "";
+    currentEntries[index].title = entryDiv.querySelector(".journal-title")
+      ? entryDiv.querySelector(".journal-title").value
+      : "";
+    currentEntries[index].text = entryDiv.querySelector(".journal-input")
+      ? entryDiv.querySelector(".journal-input").value
+      : "";
 
     collapseEntry(entryDiv);
     saveLogs();
