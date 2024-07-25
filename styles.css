@@ -49,15 +49,39 @@ button {
   padding: 10px;
   margin: 10px 0;
   border-radius: 8px;
-  background-color: #fafafa;
+  background-color: #f0f0f0;
   position: relative;
   cursor: pointer;
+}
+
+.entry.journal {
+  background-color: #d9e8f7;
+}
+
+.entry.low-rating {
+  background-color: #f7d9d9;
+}
+
+.entry.medium-rating {
+  background-color: #d9f7d9;
+}
+
+.entry.high-rating {
+  background-color: #1b5e20;
+  color: white;
 }
 
 .entry.expanded {
   max-height: none;
   overflow: visible;
   cursor: default;
+  background-color: #f4f4f4;
+}
+
+.entry .summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .entry .content {
@@ -67,12 +91,6 @@ button {
 .entry.expanded .content {
   display: block;
   text-align: left;
-}
-
-.entry .summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .entry .summary .meal-info {
@@ -111,13 +129,15 @@ input[type="text"] {
 
 .rating span {
   cursor: pointer;
-  font-size: 20px;
+  font-size: 30px;
   color: #ddd;
   margin-right: 5px;
+  text-shadow: 0 0 2px #000;
 }
 
 .rating span.rated {
   color: gold;
+  text-shadow: 0 0 2px #000;
 }
 
 .comment {

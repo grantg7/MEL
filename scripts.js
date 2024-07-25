@@ -8,8 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentEntries = [];
 
   const mealOrder = [
-    "AM Snack",
     "Breakfast",
+    "AM Snack",
     "Lunch",
     "Afternoon Snack",
     "Dinner",
@@ -23,8 +23,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const createEntryElement = (entry, index) => {
     const entryDiv = document.createElement("div");
-    entryDiv.className = "entry";
+    entryDiv.className = `entry ${entry.meal === "Journal" ? "journal" : ""}`;
     entryDiv.onclick = () => expandEntry(entryDiv);
+
+    updateEntryColor(entryDiv, entry.rating, entry.meal);
 
     const summaryDiv = document.createElement("div");
     summaryDiv.className = "summary";
@@ -35,8 +37,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const mealSelect = document.createElement("select");
     mealSelect.className = "select-meal";
     [
-      "AM Snack",
       "Breakfast",
+      "AM Snack",
       "Lunch",
       "Afternoon Snack",
       "Dinner",
@@ -52,13 +54,29 @@ document.addEventListener("DOMContentLoaded", () => {
     mealSelect.disabled = false;
 
     const foodSpan = document.createElement("span");
-    foodSpan.textContent =
-      entry.meal === "Journal"
-        ? "My Body Journal"
-        : entry.food || "What did you eat?";
+    foodSpan.textContent = entry.food || "What did you eat?";
+    foodSpan.className = "entry-title";
+    foodSpan.onclick = (event) => {
+      event.stopPropagation();
+      toggleFoodInput(entryDiv, true);
+    };
+
+    const foodInput = document.createElement("input");
+    foodInput.type = "text";
+    foodInput.value = entry.food;
+    foodInput.placeholder = "What did you eat?";
+    foodInput.className = "food-input";
+    foodInput.style.display = "none";
+
+    foodInput.onblur = () => {
+      entry.food = foodInput.value;
+      foodSpan.textContent = entry.food || "What did you eat?";
+      toggleFoodInput(entryDiv, false);
+    };
 
     mealInfoDiv.appendChild(mealSelect);
     mealInfoDiv.appendChild(foodSpan);
+    mealInfoDiv.appendChild(foodInput);
 
     const ratingDiv = document.createElement("div");
     ratingDiv.className = "rating";
@@ -71,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         star.onclick = (event) => {
           event.stopPropagation();
-          rateEntry(index, i);
+          rateEntry(index, i, entryDiv, entry.meal);
         };
         ratingDiv.appendChild(star);
       }
@@ -123,11 +141,6 @@ document.addEventListener("DOMContentLoaded", () => {
       contentDiv.appendChild(saveBtn);
       contentDiv.appendChild(deleteBtn);
     } else {
-      const foodInput = document.createElement("input");
-      foodInput.type = "text";
-      foodInput.value = entry.food;
-      foodInput.placeholder = "What did you eat?";
-
       const timerCheckbox = document.createElement("input");
       timerCheckbox.type = "checkbox";
       timerCheckbox.id = `setTimer-${index}`;
@@ -195,7 +208,6 @@ document.addEventListener("DOMContentLoaded", () => {
         removeEntry(index);
       };
 
-      contentDiv.appendChild(foodInput);
       contentDiv.appendChild(timerCheckbox);
       contentDiv.appendChild(timerLabel);
       contentDiv.appendChild(timerControlsDiv);
@@ -220,9 +232,25 @@ document.addEventListener("DOMContentLoaded", () => {
     entryDiv.appendChild(contentDiv);
     entryDiv.appendChild(closeBtn);
 
-    entriesContainer.appendChild(entryDiv);
+    entriesContainer.appendChild(entryDiv); // New entries are initially added to the bottom
 
-    mealSelect.onchange = () => updateMeal(index, mealSelect.value);
+    mealSelect.onchange = () => {
+      updateMeal(index, mealSelect.value);
+      renderEntries();
+    };
+  };
+
+  const toggleFoodInput = (entryDiv, show) => {
+    const foodSpan = entryDiv.querySelector(".entry-title");
+    const foodInput = entryDiv.querySelector(".food-input");
+    if (show) {
+      foodSpan.style.display = "none";
+      foodInput.style.display = "inline";
+      foodInput.focus();
+    } else {
+      foodSpan.style.display = "inline";
+      foodInput.style.display = "none";
+    }
   };
 
   const renderEntries = () => {
@@ -238,6 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
     entryDiv.querySelector(".content").style.display = "block";
     entryDiv.querySelector(".select-meal").disabled = false;
     entryDiv.querySelector(".close-btn").style.display = "block";
+    entryDiv.classList.remove("journal");
     entryDiv.onclick = null;
   };
 
@@ -246,54 +275,38 @@ document.addEventListener("DOMContentLoaded", () => {
     entryDiv.querySelector(".content").style.display = "none";
     entryDiv.querySelector(".select-meal").disabled = true;
     entryDiv.querySelector(".close-btn").style.display = "none";
+    if (
+      currentEntries[Array.from(entriesContainer.children).indexOf(entryDiv)]
+        .meal === "Journal"
+    ) {
+      entryDiv.classList.add("journal");
+    }
     entryDiv.onclick = () => expandEntry(entryDiv);
   };
 
-  const updateMeal = (index, meal) => {
-    currentEntries[index].meal = meal;
-    renderEntries();
+  const updateEntryColor = (entryDiv, rating, meal) => {
+    entryDiv.classList.remove(
+      "low-rating",
+      "medium-rating",
+      "high-rating",
+      "journal"
+    );
+    if (meal === "Journal") {
+      entryDiv.classList.add("journal");
+    } else if (rating === 0) {
+      entryDiv.style.backgroundColor = "#f0f0f0"; // Grey for no rating
+    } else if (rating <= 2) {
+      entryDiv.classList.add("low-rating");
+    } else if (rating <= 4) {
+      entryDiv.classList.add("medium-rating");
+    } else if (rating === 5) {
+      entryDiv.classList.add("high-rating");
+    }
   };
 
-  const updateFood = (index, food) => {
-    currentEntries[index].food = food;
-  };
-
-  const startTimer = (entryDiv, index, duration) => {
-    const timer = document.createElement("span");
-    timer.className = "timer";
-    entryDiv.appendChild(timer);
-    let timeLeft = duration * 60;
-    const audio = new Audio("path/to/alarm-sound.mp3"); // replace with your sound file path
-    const countdown = setInterval(() => {
-      if (timeLeft <= 0) {
-        clearInterval(countdown);
-        timer.textContent = "Time's up!";
-        audio.play();
-      } else {
-        timeLeft--;
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        timer.textContent = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-      }
-    }, 1000);
-
-    const stopBtn = document.createElement("button");
-    stopBtn.textContent = "Stop Sound";
-    stopBtn.onclick = () => {
-      audio.pause();
-      audio.currentTime = 0;
-    };
-
-    entryDiv.appendChild(stopBtn);
-
-    document.addEventListener("mousemove", () => {
-      audio.pause();
-      audio.currentTime = 0;
-    });
-  };
-
-  const rateEntry = (index, rating) => {
+  const rateEntry = (index, rating, entryDiv, meal) => {
     currentEntries[index].rating = rating;
+    updateEntryColor(entryDiv, rating, meal);
     renderEntries();
   };
 
@@ -324,12 +337,14 @@ document.addEventListener("DOMContentLoaded", () => {
       : "";
 
     collapseEntry(entryDiv);
+    renderEntries();
     saveLogs();
   };
 
   const removeEntry = (index) => {
     currentEntries.splice(index, 1);
     renderEntries();
+    saveLogs();
   };
 
   const saveLog = () => {
@@ -345,9 +360,14 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   addEntryBtn.onclick = () => {
-    const newEntry = { meal: "Breakfast", food: "", rating: 0, comment: "" };
+    const newEntry = {
+      meal: "Uncategorized",
+      food: "",
+      rating: 0,
+      comment: "",
+    };
     currentEntries.push(newEntry);
-    renderEntries();
+    createEntryElement(newEntry, currentEntries.length - 1);
   };
 
   saveLogBtn.onclick = saveLog;
