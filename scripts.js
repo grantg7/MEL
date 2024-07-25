@@ -339,12 +339,14 @@ document.addEventListener("DOMContentLoaded", () => {
     collapseEntry(entryDiv);
     renderEntries();
     saveLogs();
+    updateCalendar();
   };
 
   const removeEntry = (index) => {
     currentEntries.splice(index, 1);
     renderEntries();
     saveLogs();
+    updateCalendar();
   };
 
   const saveLog = () => {
@@ -357,6 +359,19 @@ document.addEventListener("DOMContentLoaded", () => {
     saveLogs();
     currentEntries = [];
     renderEntries();
+    updateCalendar();
+  };
+
+  const updateCalendar = () => {
+    const datesWithEntries = Object.keys(logs);
+    const dateInput = logDateInput;
+    dateInput.querySelectorAll("option").forEach((option) => {
+      if (datesWithEntries.includes(option.value)) {
+        option.style.backgroundColor = "lightgreen";
+      } else {
+        option.style.backgroundColor = "";
+      }
+    });
   };
 
   addEntryBtn.onclick = () => {
@@ -378,5 +393,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderEntries();
   };
 
+  updateCalendar();
   renderEntries();
 });
