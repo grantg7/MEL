@@ -3,17 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Energy List</title>
+    <title>Food Journal</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="container">
-      <h1>My Energy List</h1>
+      <div class="header">
+        <h1>My Energy List</h1>
+        <p class="header">Home | Favorite Foods | Account</p>
+      </div>
+      <h1>Food Logging Journal</h1>
       <label for="logDate">Select Date:</label>
-      <input type="date" id="logDate" />
-      <button id="addEntryBtn">+ Add Entry</button>
-      <button id="saveLogBtn">Save Log</button>
+      <div id="customDatePicker" class="custom-date-picker"></div>
+      <!-- Custom date picker container -->
+      <input type="date" id="logDate" style="display: none" />
+      <!-- Hidden original date input -->
+      <button id="addEntryBtn">Add Entry</button>
       <div id="entriesContainer"></div>
+      <button id="saveLogBtn">Save Log</button>
     </div>
     <script src="scripts.js"></script>
   </body>

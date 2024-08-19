@@ -1,3 +1,27 @@
+/* header */
+.header {
+  max-width: auto;
+  background-color: #0355bd;
+  padding-top: 10px;
+  padding-left: 0px;
+  padding-right: 0px;
+  padding-bottom: 0px;
+  margin-top: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-bottom: 0px;
+  color: #ffffff;
+  border-radius: 10px;
+  border-bottom: #000 solid;
+}
+p.header {
+  color: white;
+  padding-bottom: 10px;
+  font-family: lato;
+  font-size: 20px;
+  font-weight: bold;
+}
+
 body {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -10,7 +34,7 @@ body {
 .container {
   width: 80%;
   margin: 0 auto;
-  padding: 20px;
+  padding: 0px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -24,14 +48,6 @@ label {
   text-align: center;
   display: block;
   margin-top: 10px;
-  font-size: 16px;
-}
-
-input[type="date"] {
-  width: 25%;
-  text-align: center;
-  padding: 5px;
-  margin: 10px 0;
   font-size: 16px;
 }
 
@@ -129,7 +145,7 @@ input[type="text"] {
 
 .rating span {
   cursor: pointer;
-  font-size: 30px;
+  font-size: 20px;
   color: #ddd;
   margin-right: 5px;
   text-shadow: 0 0 2px #000;
@@ -193,4 +209,24 @@ input[type="text"] {
 .journal-input {
   width: 550px;
   height: 160px;
+}
+
+.custom-date-picker {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin: 20px;
+}
+
+.custom-date-picker .date-cell {
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+.custom-date-picker .date-cell.highlighted {
+  background-color: lightgreen;
 }

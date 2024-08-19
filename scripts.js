@@ -3,9 +3,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const saveLogBtn = document.getElementById("saveLogBtn");
   const entriesContainer = document.getElementById("entriesContainer");
   const logDateInput = document.getElementById("logDate");
+  const customDatePicker = document.getElementById("customDatePicker"); // Custom date picker container
 
   let logs = JSON.parse(localStorage.getItem("logs")) || {};
   let currentEntries = [];
+  const today = new Date();
 
   const mealOrder = [
     "Breakfast",
@@ -364,14 +366,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const updateCalendar = () => {
     const datesWithEntries = Object.keys(logs);
-    const dateInput = logDateInput;
-    dateInput.querySelectorAll("option").forEach((option) => {
-      if (datesWithEntries.includes(option.value)) {
-        option.style.backgroundColor = "lightgreen";
-      } else {
-        option.style.backgroundColor = "";
+    customDatePicker.innerHTML = ""; // Clear previous calendar
+    const month = today.getMonth();
+    const year = today.getFullYear();
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(
+        day
+      ).padStart(2, "0")}`;
+      const dateCell = document.createElement("div");
+      dateCell.className = "date-cell";
+      if (datesWithEntries.includes(dateStr)) {
+        dateCell.classList.add("highlighted");
       }
-    });
+      dateCell.textContent = day;
+      dateCell.onclick = () => {
+        logDateInput.value = dateStr;
+        logDateInput.dispatchEvent(new Event("change"));
+      };
+      customDatePicker.appendChild(dateCell);
+    }
   };
 
   addEntryBtn.onclick = () => {
