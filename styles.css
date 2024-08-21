@@ -64,8 +64,13 @@ button {
 .siteCalendar {
   border: #b5b5b5 solid 1px;
   border-top: 0px;
-  margin: 20px;
-  border-radius: 10px;
+  border-bottom: 0px;
+  margin-top: 20px;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 0px;
+
+  border-radius: 10px 10px 10px 10px;
 }
 .h1siteCalendar {
   border: #b5b5b5 solid 1px;
@@ -74,6 +79,27 @@ button {
   margin-top: 0px;
   background-color: #f4f4f4;
 }
+
+.flex-container {
+  display: flex;
+  border: 1px solid #b5b5b5;
+  padding: 10px;
+  margin: 0px;
+  border-radius: 0px 0px 10px 10px;
+}
+
+.flex-child1 {
+  flex: 1;
+  border-right: 1px solid #b5b5b5;
+  padding: 20px;
+}
+
+.flex-child2 {
+  flex: 1;
+  border-left: 1px solid #b5b5b5;
+  padding: 20px;
+}
+
 .entry {
   border: 1px solid #ddd;
   padding: 10px;
