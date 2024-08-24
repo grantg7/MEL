@@ -3,11 +3,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const saveLogBtn = document.getElementById("saveLogBtn");
   const entriesContainer = document.getElementById("entriesContainer");
   const logDateInput = document.getElementById("logDate");
-  const customDatePicker = document.getElementById("customDatePicker"); // Custom date picker container
+  const customDatePicker = document.getElementById("customDatePicker");
+  const percentageDaysGreenContainer = document.querySelector(".flex-child2");
+  const daysMissedContainer = document.querySelector(".flex-child1");
+  const prevMonthBtn = document.getElementById("prevMonthBtn");
+  const nextMonthBtn = document.getElementById("nextMonthBtn");
+  const monthYearDisplay = document.getElementById("monthYearDisplay");
 
   let logs = JSON.parse(localStorage.getItem("logs")) || {};
   let currentEntries = [];
-  const today = new Date();
+  let currentMonth = new Date().getMonth();
+  let currentYear = new Date().getFullYear();
+  let selectedDateCell = null; // Track the selected date cell
 
   const mealOrder = [
     "Breakfast",
@@ -55,29 +62,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     mealSelect.disabled = false;
 
-    const foodSpan = document.createElement("span");
-    foodSpan.textContent = entry.food || "What did you eat?";
-    foodSpan.className = "entry-title";
-    foodSpan.onclick = (event) => {
-      event.stopPropagation();
-      toggleFoodInput(entryDiv, true);
-    };
-
     const foodInput = document.createElement("input");
     foodInput.type = "text";
-    foodInput.value = entry.food;
+    foodInput.value = entry.food || "";
     foodInput.placeholder = "What did you eat?";
     foodInput.className = "food-input";
-    foodInput.style.display = "none";
 
-    foodInput.onblur = () => {
+    foodInput.oninput = () => {
       entry.food = foodInput.value;
-      foodSpan.textContent = entry.food || "What did you eat?";
-      toggleFoodInput(entryDiv, false);
     };
 
     mealInfoDiv.appendChild(mealSelect);
-    mealInfoDiv.appendChild(foodSpan);
     mealInfoDiv.appendChild(foodInput);
 
     const ratingDiv = document.createElement("div");
@@ -103,120 +98,36 @@ document.addEventListener("DOMContentLoaded", () => {
     const contentDiv = document.createElement("div");
     contentDiv.className = "content";
 
-    if (entry.meal === "Journal") {
-      const titleInput = document.createElement("input");
-      titleInput.type = "text";
-      titleInput.value = entry.title || "";
-      titleInput.placeholder = "Title";
-      titleInput.className = "journal-title";
-      titleInput.oninput = () => {
-        entry.title = titleInput.value;
-      };
+    const commentDiv = document.createElement("div");
+    commentDiv.className = "comment";
+    const commentTextarea = document.createElement("textarea");
+    commentTextarea.maxLength = 500;
+    commentTextarea.placeholder = "How did it make you feel?";
+    commentTextarea.value = entry.comment || "";
+    commentTextarea.oninput = () => {
+      entry.comment = commentTextarea.value;
+    };
+    commentDiv.appendChild(commentTextarea);
 
-      const journalTextarea = document.createElement("textarea");
-      journalTextarea.maxLength = 1000;
-      journalTextarea.placeholder = "Write your journal entry...";
-      journalTextarea.value = entry.text || "";
-      journalTextarea.className = "journal-input";
-      journalTextarea.oninput = () => {
-        entry.text = journalTextarea.value;
-      };
+    const saveBtn = document.createElement("button");
+    saveBtn.className = "save-btn";
+    saveBtn.textContent = "Save and Exit";
+    saveBtn.onclick = (event) => {
+      event.stopPropagation();
+      saveEntry(entryDiv, index);
+    };
 
-      const saveBtn = document.createElement("button");
-      saveBtn.className = "save-btn";
-      saveBtn.textContent = "Save and Exit";
-      saveBtn.onclick = (event) => {
-        event.stopPropagation();
-        saveEntry(entryDiv, index);
-      };
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "delete-btn";
+    deleteBtn.textContent = "Remove";
+    deleteBtn.onclick = (event) => {
+      event.stopPropagation();
+      removeEntry(index);
+    };
 
-      const deleteBtn = document.createElement("button");
-      deleteBtn.className = "delete-btn";
-      deleteBtn.textContent = "Remove";
-      deleteBtn.onclick = (event) => {
-        event.stopPropagation();
-        removeEntry(index);
-      };
-
-      contentDiv.appendChild(titleInput);
-      contentDiv.appendChild(journalTextarea);
-      contentDiv.appendChild(saveBtn);
-      contentDiv.appendChild(deleteBtn);
-    } else {
-      const timerCheckbox = document.createElement("input");
-      timerCheckbox.type = "checkbox";
-      timerCheckbox.id = `setTimer-${index}`;
-      timerCheckbox.className = "set-timer";
-
-      const timerLabel = document.createElement("label");
-      timerLabel.htmlFor = `setTimer-${index}`;
-      timerLabel.textContent = "Set Timer?";
-
-      const timerControlsDiv = document.createElement("div");
-      timerControlsDiv.className = "timer-controls";
-
-      const timerRange = document.createElement("input");
-      timerRange.type = "range";
-      timerRange.min = "5";
-      timerRange.max = "60";
-      timerRange.step = "5";
-      timerRange.value = "30";
-      timerRange.className = "timer-range";
-
-      const timerRangeLabel = document.createElement("label");
-      timerRangeLabel.textContent = `Timer: ${timerRange.value} mins`;
-
-      timerRange.oninput = () => {
-        timerRangeLabel.textContent = `Timer: ${timerRange.value} mins`;
-      };
-
-      const timerBtn = document.createElement("button");
-      timerBtn.textContent = "Start Timer";
-      timerBtn.onclick = () => startTimer(entryDiv, index, timerRange.value);
-
-      timerControlsDiv.appendChild(timerRangeLabel);
-      timerControlsDiv.appendChild(timerRange);
-      timerControlsDiv.appendChild(timerBtn);
-
-      timerCheckbox.onchange = () => {
-        timerControlsDiv.style.display = timerCheckbox.checked
-          ? "block"
-          : "none";
-      };
-
-      const commentDiv = document.createElement("div");
-      commentDiv.className = "comment";
-      const commentTextarea = document.createElement("textarea");
-      commentTextarea.maxLength = 500;
-      commentTextarea.placeholder = "How did it make you feel?";
-      commentTextarea.value = entry.comment;
-      commentTextarea.oninput = () =>
-        updateComment(index, commentTextarea.value);
-      commentDiv.appendChild(commentTextarea);
-
-      const saveBtn = document.createElement("button");
-      saveBtn.className = "save-btn";
-      saveBtn.textContent = "Save and Exit";
-      saveBtn.onclick = (event) => {
-        event.stopPropagation();
-        saveEntry(entryDiv, index);
-      };
-
-      const deleteBtn = document.createElement("button");
-      deleteBtn.className = "delete-btn";
-      deleteBtn.textContent = "Remove";
-      deleteBtn.onclick = (event) => {
-        event.stopPropagation();
-        removeEntry(index);
-      };
-
-      contentDiv.appendChild(timerCheckbox);
-      contentDiv.appendChild(timerLabel);
-      contentDiv.appendChild(timerControlsDiv);
-      contentDiv.appendChild(commentDiv);
-      contentDiv.appendChild(saveBtn);
-      contentDiv.appendChild(deleteBtn);
-    }
+    contentDiv.appendChild(commentDiv);
+    contentDiv.appendChild(saveBtn);
+    contentDiv.appendChild(deleteBtn);
 
     const closeBtn = document.createElement("button");
     closeBtn.className = "close-btn";
@@ -234,25 +145,12 @@ document.addEventListener("DOMContentLoaded", () => {
     entryDiv.appendChild(contentDiv);
     entryDiv.appendChild(closeBtn);
 
-    entriesContainer.appendChild(entryDiv); // New entries are initially added to the bottom
+    entriesContainer.appendChild(entryDiv);
 
     mealSelect.onchange = () => {
-      updateMeal(index, mealSelect.value);
+      entry.meal = mealSelect.value;
       renderEntries();
     };
-  };
-
-  const toggleFoodInput = (entryDiv, show) => {
-    const foodSpan = entryDiv.querySelector(".entry-title");
-    const foodInput = entryDiv.querySelector(".food-input");
-    if (show) {
-      foodSpan.style.display = "none";
-      foodInput.style.display = "inline";
-      foodInput.focus();
-    } else {
-      foodSpan.style.display = "inline";
-      foodInput.style.display = "none";
-    }
   };
 
   const renderEntries = () => {
@@ -312,43 +210,19 @@ document.addEventListener("DOMContentLoaded", () => {
     renderEntries();
   };
 
-  const updateComment = (index, comment) => {
-    currentEntries[index].comment = comment;
-  };
-
   const saveEntry = (entryDiv, index) => {
-    const foodInput = entryDiv.querySelector('input[type="text"]');
-    const timerCheckbox = entryDiv.querySelector(".set-timer");
-    const timerRange = entryDiv.querySelector(".timer-range");
-    const commentTextarea = entryDiv.querySelector(".comment textarea");
-
-    currentEntries[index].food = foodInput ? foodInput.value : "";
-    currentEntries[index].timer = timerCheckbox
-      ? timerCheckbox.checked
-        ? timerRange.value
-        : null
-      : null;
-    currentEntries[index].comment = commentTextarea
-      ? commentTextarea.value
-      : "";
-    currentEntries[index].title = entryDiv.querySelector(".journal-title")
-      ? entryDiv.querySelector(".journal-title").value
-      : "";
-    currentEntries[index].text = entryDiv.querySelector(".journal-input")
-      ? entryDiv.querySelector(".journal-input").value
-      : "";
-
+    currentEntries[index].food = entryDiv.querySelector(".food-input").value;
+    currentEntries[index].comment =
+      entryDiv.querySelector(".comment textarea").value;
     collapseEntry(entryDiv);
     renderEntries();
     saveLogs();
-    updateCalendar();
   };
 
   const removeEntry = (index) => {
     currentEntries.splice(index, 1);
     renderEntries();
     saveLogs();
-    updateCalendar();
   };
 
   const saveLog = () => {
@@ -367,28 +241,79 @@ document.addEventListener("DOMContentLoaded", () => {
   const updateCalendar = () => {
     const datesWithEntries = Object.keys(logs);
     customDatePicker.innerHTML = ""; // Clear previous calendar
-    const month = today.getMonth();
-    const year = today.getFullYear();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    let greenDaysCount = 0;
 
     for (let day = 1; day <= daysInMonth; day++) {
-      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(
-        day
-      ).padStart(2, "0")}`;
+      const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(
+        2,
+        "0"
+      )}-${String(day).padStart(2, "0")}`;
       const dateCell = document.createElement("div");
       dateCell.className = "date-cell";
       if (datesWithEntries.includes(dateStr)) {
         dateCell.classList.add("highlighted");
+        greenDaysCount++;
       }
       dateCell.textContent = day;
       dateCell.onclick = () => {
+        if (selectedDateCell) {
+          selectedDateCell.classList.remove("selected"); // Remove highlight from the previous selection
+        }
+        selectedDateCell = dateCell;
+        dateCell.classList.add("selected"); // Highlight the new selection
         logDateInput.value = dateStr;
         logDateInput.dispatchEvent(new Event("change"));
       };
       customDatePicker.appendChild(dateCell);
     }
+
+    const missedDaysCount = daysInMonth - greenDaysCount;
+    const percentageGreen = ((greenDaysCount / daysInMonth) * 100).toFixed(2);
+
+    daysMissedContainer.textContent = `Days Missed: ${missedDaysCount}`;
+    percentageDaysGreenContainer.textContent = `% Days Green: ${greenDaysCount}/${daysInMonth} (${percentageGreen}%)`;
+
+    // Update the month and year display
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    monthYearDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`;
   };
+
+  const changeMonth = (direction) => {
+    if (direction === "next") {
+      if (currentMonth === 11) {
+        currentMonth = 0;
+        currentYear++;
+      } else {
+        currentMonth++;
+      }
+    } else if (direction === "prev") {
+      if (currentMonth === 0) {
+        currentMonth = 11;
+        currentYear--;
+      } else {
+        currentMonth--;
+      }
+    }
+    updateCalendar();
+  };
+
+  prevMonthBtn.onclick = () => changeMonth("prev");
+  nextMonthBtn.onclick = () => changeMonth("next");
 
   addEntryBtn.onclick = () => {
     const newEntry = {
